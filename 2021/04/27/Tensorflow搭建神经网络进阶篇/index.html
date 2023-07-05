@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhangliyuan-tech.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="写在前面在Tensorflow搭建神经网络基础篇中，我们已经介绍了基本的神经网络的组成结构和搭建方法。在本博文中我们将会在上篇博文基础之上展示一些进阶内容。本博文主要涉及以下内容：Tensorboard可视化、分类学习任务、过拟合问题的产生以及解决方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tensorflow搭建神经网络进阶篇">
+<meta property="og:url" content="https://Zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/index.html">
+<meta property="og:site_name" content="张力元的个人站">
+<meta property="og:description" content="写在前面在Tensorflow搭建神经网络基础篇中，我们已经介绍了基本的神经网络的组成结构和搭建方法。在本博文中我们将会在上篇博文基础之上展示一些进阶内容。本博文主要涉及以下内容：Tensorboard可视化、分类学习任务、过拟合问题的产生以及解决方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/np.newaxis%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B%E7%BB%93%E6%9E%9C.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E6%9B%B2%E7%BA%BF%E5%9B%BE.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%B5%81%E7%A8%8B%E5%9B%BE.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard%E5%8D%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1%E5%9B%BE.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/%E5%88%86%E7%B1%BB%E4%BE%8B%E7%A8%8B%E8%AE%AD%E7%BB%83%E5%87%86%E7%A1%AE%E7%8E%87%E7%BB%93%E6%9E%9C.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/%E8%BF%87%E6%8B%9F%E5%90%88%E6%A6%82%E5%BF%B5%E5%9B%BE.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Dropout.png">
+<meta property="article:published_time" content="2021-04-27T13:18:14.000Z">
+<meta property="article:modified_time" content="2021-05-04T12:59:10.000Z">
+<meta property="article:author" content="张力元">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Tensorflow">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/np.newaxis%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B%E7%BB%93%E6%9E%9C.PNG">
+
+<link rel="canonical" href="https://Zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Tensorflow搭建神经网络进阶篇 | 张力元的个人站</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">张力元的个人站</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">分享·技术·生活</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://Zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="张力元">
+      <meta itemprop="description" content="在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张力元的个人站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tensorflow搭建神经网络进阶篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-27 21:18:14" itemprop="dateCreated datePublished" datetime="2021-04-27T21:18:14+08:00">2021-04-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-04 20:59:10" itemprop="dateModified" datetime="2021-05-04T20:59:10+08:00">2021-05-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">Tensorflow搭建神经网络</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>在<a href="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/">Tensorflow搭建神经网络基础篇</a>中，我们已经介绍了基本的神经网络的组成结构和搭建方法。在本博文中我们将会在上篇博文基础之上展示一些进阶内容。本博文主要涉及以下内容：Tensorboard可视化、分类学习任务、过拟合问题的产生以及解决方法。</p>
+<a id="more"></a>
+<h3 id="1、可视化：Tensorboard"><a href="#1、可视化：Tensorboard" class="headerlink" title="1、可视化：Tensorboard"></a>1、可视化：Tensorboard</h3><h4 id="（1）什么是Tensorboard"><a href="#（1）什么是Tensorboard" class="headerlink" title="（1）什么是Tensorboard"></a>（1）什么是Tensorboard</h4><p>TensorBoard可以将TensorFlow程序的执行步骤都显示出来，非常直观。并且，我们可以对训练的参数(比如loss值)进行统计，用图的方式来查看变化的趋势。</p>
+<h4 id="（2）示例程序"><a href="#（2）示例程序" class="headerlink" title="（2）示例程序"></a>（2）示例程序</h4><p>导入Tensorflow模块、Numpy模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<p>定义添加层函数。tf.name_scope()函数在这里建立了一个变量空间，变量空间下包含几个变量权重（Weights）、偏差（biases）、预测值（Wx_plus_b）、</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(inputs, in_size, out_size, n_layer, activation_function=None)</span>:</span></span><br><span class="line">    layer_name = <span class="string">"layer%s"</span>%n_layer</span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'weights'</span>):</span><br><span class="line">        Weights = tf.Variable(tf.random_normal([in_size, out_size]))<span class="comment">#变量中的值都是随机变量（random）的值</span></span><br><span class="line">        tf.summary.histogram(layer_name+<span class="string">'/weights'</span>, Weights)</span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'biases'</span>):</span><br><span class="line">        biases = tf.Variable(tf.zeros([<span class="number">1</span>, out_size]) + <span class="number">0.1</span>)</span><br><span class="line">        tf.summary.histogram(layer_name + <span class="string">'/biases'</span>, biases)</span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'Wx_plus_b'</span>):</span><br><span class="line">        Wx_plus_b = tf.matmul(inputs, Weights) + biases<span class="comment">#未激活的值存储在这里面</span></span><br><span class="line">    <span class="keyword">if</span> activation_function <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        outputs = Wx_plus_b</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        outputs = activation_function(Wx_plus_b)</span><br><span class="line">        tf.summary.histogram(layer_name + <span class="string">'/outputs'</span>, outputs)</span><br><span class="line">    <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+<p>定义输入数据和输出值函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x_data = np.linspace(<span class="number">-1</span>, <span class="number">1</span>, <span class="number">300</span>)[:, np.newaxis]</span><br><span class="line">noise = np.random.normal(<span class="number">0</span>, <span class="number">0.05</span>, x_data.shape)</span><br><span class="line">y_data = np.square(x_data) - <span class="number">0.5</span> + noise</span><br></pre></td></tr></table></figure>
+<p>在这里要注意x_data的输出值是经过变形得到的，主要是由于[:, np.newaxis]函数的原因，下面的例子将展示该函数的使用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">a = np.arange(<span class="number">10</span>)</span><br><span class="line">b = a[:, np.newaxis]</span><br><span class="line">c = a[np.newaxis, :]</span><br><span class="line"></span><br><span class="line">sess = tf.Session()</span><br><span class="line">print(a)</span><br><span class="line">print(b)</span><br><span class="line">print(c)</span><br></pre></td></tr></table></figure>
+<p>程序输出结果：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/np.newaxis函数使用示例结果.PNG" alt="np.newaxis函数使用示例结果"></p>
+<p>将占位符xs和ys设置在一个图层中，并将图层命名为inputs。xs在图层中显示为x_input，ys在图层中显示为y_input。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'inputs'</span>):</span><br><span class="line">  xs = tf.placeholder(tf.float32, [<span class="literal">None</span>, <span class="number">1</span>], name=<span class="string">'x_input'</span>)</span><br><span class="line">  ys = tf.placeholder(tf.float32, [<span class="literal">None</span>, <span class="number">1</span>], name=<span class="string">'y_input'</span>)</span><br></pre></td></tr></table></figure>
+<p>设置隐藏层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'layer1'</span>):</span><br><span class="line">    l1 = add_layer(xs, <span class="number">1</span>, <span class="number">10</span>, n_layer=<span class="number">1</span>, activation_function=tf.nn.relu)</span><br></pre></td></tr></table></figure>
+<p>设置输出层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'layer2'</span>):</span><br><span class="line">    prediction = add_layer(l1, <span class="number">10</span>, <span class="number">1</span>, n_layer=<span class="number">2</span>, activation_function=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+<p>设置损失函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'loss'</span>):</span><br><span class="line">    loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[<span class="number">1</span>]))</span><br><span class="line">    tf.summary.scalar(<span class="string">'loss'</span>, loss)</span><br></pre></td></tr></table></figure>
+<p>设置训练优化函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'train'</span>):</span><br><span class="line">    train_step = tf.train.GradientDescentOptimizer(<span class="number">0.1</span>).minimize(loss)</span><br></pre></td></tr></table></figure>
+<p>开始运行训练会话。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sess = tf.Session()</span><br><span class="line">merged = tf.summary.merge_all()<span class="comment">#将summary打包</span></span><br><span class="line">writer = tf.compat.v1.summary.FileWriter(<span class="string">'log/.'</span>, sess.graph)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">    sess.run(train_step, feed_dict=&#123;xs: x_data, ys: y_data&#125;)</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">50</span> == <span class="number">0</span>:</span><br><span class="line">        result = sess.run(merged, feed_dict=&#123;xs: x_data, ys: y_data&#125;)</span><br><span class="line">        writer.add_summary(result, i)</span><br></pre></td></tr></table></figure>
+<p>程序运行完毕后，在根目录下的log文件夹中包含一个envents文件。本次Tensorboard程序存储在Tensorboard文件夹中，文件结构如下：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Tensorboard</span><br><span class="line">	log-&gt;envents</span><br><span class="line">	<span class="module-access"><span class="module"><span class="identifier">Tensorboard</span>.</span></span>py</span><br></pre></td></tr></table></figure>
+<p>打开命令行窗口，激活tensorflow环境，执行tensorboard —logdir=”Tensorboard”语句，命令行将会出现一个链接，复制链接到Google Chrome浏览器，即可查看预训练有关的曲线、神经网络的流程图以及变量的统计图。</p>
+<p>训练损失函数曲线：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard损失函数曲线图.PNG" alt="Tensorboard损失函数曲线图"></p>
+<p>神经网络流程图：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard神经网络的流程图.PNG" alt="Tensorboard神经网络的流程图"></p>
+<p>单层数据统计图：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Tensorboard单层数据统计图.PNG" alt="Tensorboard单层数据统计图"></p>
+<h3 id="2、分类学习任务：Classification"><a href="#2、分类学习任务：Classification" class="headerlink" title="2、分类学习任务：Classification"></a>2、分类学习任务：Classification</h3><h4 id="（1）什么是分类？"><a href="#（1）什么是分类？" class="headerlink" title="（1）什么是分类？"></a>（1）什么是分类？</h4><p>首先，需要思考以下什么是分类？很显然，分类是将数据集中的数据进行归纳整理的一个过程。现实中我们经常会遇到分类问题，例如何对书籍进行归纳和整理、计算机文件夹中的文件如何放置以及桌面物品的收纳整理等。在我们去分类的过程中，是否意识到一个问题，我们是依据什么标准去对杂乱的书籍、文件以及物品进行分类整理的呢？</p>
+<p>答案其实隐藏在我们思考的过程中，只不过是我们没有意识到而已。当我们对这些东西进行分类整理的过程中，在脑海里都会有一个思考过程，就是这个东西和什么有关，要把它整理到哪个类别中呢，这个过程就是我们对文件和物品进行了一个打上标签印象的过程。在分类学习任务中，我们也需要对待分类的数据进行打标签的操作，之后通过神经网络进行分类操作。</p>
+<p>神经网络分类的结果并不一定总是很优秀的，自然而然需要对分类结果进行评价。不同的要求对分类结果的评价也不尽相同。</p>
+<h4 id="（2）例程：MNIST手写体分类"><a href="#（2）例程：MNIST手写体分类" class="headerlink" title="（2）例程：MNIST手写体分类"></a>（2）例程：MNIST手写体分类</h4><p>数据集：<a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">MNIST手写体数据集</a>，包括0-9十个数字的手写体。</p>
+<p>MNIST数据集详细介绍：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>文件名称</th>
+<th>大小</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>train-images-idx3-ubyte.gz</td>
+<td>9,681 kb</td>
+<td>55000张训练集，5000张验证集</td>
+</tr>
+<tr>
+<td>train-labels-idx1-ubyte.gz</td>
+<td>29 kb</td>
+<td>训练集图片对应的标签</td>
+</tr>
+<tr>
+<td>t10k-images-idx3-ubyte.gz</td>
+<td>1,611 kb</td>
+<td>10000张测试集</td>
+</tr>
+<tr>
+<td>t10k-labels-idx1-ubyte.gz</td>
+<td>5 kb</td>
+<td>测试集图片对应的标签</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>导入Tensorflow模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br></pre></td></tr></table></figure>
+<p>读取MNIST数据集，数据集包含55000张训练集，每张图片的分辨率大小是28*28。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> tensorflow.examples.tutorials.mnist <span class="keyword">import</span> input_data</span><br><span class="line"><span class="comment">#number 1 to 10 data</span></span><br><span class="line">mnist = input_data.read_data_sets(<span class="string">"MNIST_data/"</span>, one_hot=<span class="literal">True</span>)<span class="comment">#括号内是MNIST数据集存放的路径</span></span><br></pre></td></tr></table></figure>
+<p>定义添加层函数，添加层函数的定义参考上一篇博文“Tensorflow搭建神经网络基础篇”。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(inputs, in_size, out_size, activation_function=None)</span>:</span></span><br><span class="line">    Weights = tf.Variable(tf.random_normal([in_size, out_size]))</span><br><span class="line">    biases = tf.Variable(tf.zeros([<span class="number">1</span>, out_size]) + <span class="number">0.1</span>)</span><br><span class="line">    Wx_plus_b = tf.matmul(inputs, Weights) + biases</span><br><span class="line">    <span class="keyword">if</span> activation_function <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        outputs = Wx_plus_b</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        outputs = activation_function(Wx_plus_b)</span><br><span class="line">    <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+<p>定义训练准确率函数。tf.argmax()函数是索引，tf.equal()是比较。tf.cast()将数据进行转换，由于tf.equal()返回的向量或矩阵的组成元素是True或者False，因此采用tf.cast()将True转换为1,False转换成0。tf.reduce_mean()求解均值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">compute_accuracy</span><span class="params">(v_xs, v_ys)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> prediction <span class="comment">#将prediction定义成全局变量</span></span><br><span class="line">    y_pre = sess.run(prediction, feed_dict=&#123;xs:v_xs&#125;) <span class="comment">#y的预测值</span></span><br><span class="line">    correct_prediction = tf.equal(tf.argmax(y_pre, <span class="number">1</span>), tf.argmax(v_ys, <span class="number">1</span>)) <span class="comment">#比较预测值和实际值是否相等，假设有50个预测值，判断有多少个预测值和真实值是相等的</span></span><br><span class="line">    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) <span class="comment">#指定方向的平均值</span></span><br><span class="line">    result = sess.run(accuracy, feed_dict=&#123;xs:v_xs, ys:v_ys&#125;)</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+<p>注：下面一段程序可以更加清晰的认识tf.cast()函数和tf.reduce_mean()函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">x = [[<span class="literal">True</span>, <span class="literal">False</span>, <span class="literal">True</span>, <span class="literal">False</span>, <span class="literal">True</span>, <span class="literal">False</span>]]</span><br><span class="line">xx = tf.cast(x, tf.float32)</span><br><span class="line"></span><br><span class="line">init = tf.global_variables_initializer()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(init)</span><br><span class="line">    a = tf.reduce_mean(xx)</span><br><span class="line">    print(sess.run(xx))</span><br><span class="line">    print(sess.run(a))</span><br></pre></td></tr></table></figure>
+<p>定义输入和输出占位符。由于每张图片的分辨率大小是28*28，因此需要输入784个像素数据；输出类别为10，对应MNIST数据集的数据组成类别。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xs = tf.placeholder(tf.<span class="built_in">float</span>32, [None, <span class="number">784</span>])</span><br><span class="line">ys = tf.placeholder(tf.<span class="built_in">float</span>32, [None, <span class="number">10</span>])</span><br></pre></td></tr></table></figure>
+<p>定义输出层。在这里并没有定义隐藏层，而是直接定义了一个输出层。通常神经层由输入层、隐藏层和输出层组成，在这里省略了隐藏层，这样构成的神经网络实际上是一个由输入层和输出层构成的二层的网络，数据的输入直接作为输入层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prediction = add_layer(xs, <span class="number">784</span>, <span class="number">10</span>, activation_function=tf.nn.softmax)<span class="comment">#激励函数采用了softmax函数</span></span><br></pre></td></tr></table></figure>
+<p>定义损失函数，在这里采用了交叉熵作为损失函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys*tf.log(prediction), reduction_indices=[<span class="number">1</span>]))</span><br></pre></td></tr></table></figure>
+<p>定义神经网络的训练优化器。TensorFlow优化器GradientDescentOptimizer是一个实现梯度下降算法的优化器。在这里取值是0.5表示以0.5的效率来最小化误差交叉熵（cross_entropy）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_step = tf.train.GradientDescentOptimizer(<span class="number">0.5</span>).minimize(cross_entropy)</span><br></pre></td></tr></table></figure>
+<p>初始化变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">init = tf.global_variables_initializer()</span><br></pre></td></tr></table></figure>
+<p>初始化会话控制Session。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sess = tf.Session()</span><br></pre></td></tr></table></figure>
+<p>初始化变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sess.run(init)</span><br></pre></td></tr></table></figure>
+<p>开始训练神经网络。执行1000次训练，在这里采用了批量梯度下降算法，因此设置每一次一批批训练数据为100个。注意，batch_xs是训练值，其输出是prediction；batch_ys是真实值（也就是设置的标签），其主要作用是计算交叉熵（cross_entropy）。在这里每50次输出一次神经网络的准确率值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    batch_xs, batch_ys = mnist.train.next_batch(batch_size)  <span class="comment">#从train的集合中选取batch_size个训练数据</span></span><br><span class="line">    sess.run(train_step, feed_dict=&#123;xs:batch_xs, ys:batch_ys&#125;)</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">50</span> == <span class="number">0</span>:</span><br><span class="line">        print(compute_accuracy(mnist.test.images, mnist.test.labels))</span><br></pre></td></tr></table></figure>
+<p>神经网络训练准确率输出结果：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/分类例程训练准确率结果.PNG" alt="分类例程训练准确率结果"></p>
+<p>可以看到随着训练次数的不断增加，这个两层的简单神经网络已经能够实现很不错的分类效果。当然，我们可以调整训练次数和batch_size来实现更加准确的训练，然而训练并不是无止境的。盲目的扩大训练参数很可能会使神经网络陷入过拟合，也就是过度学习的问题。接下来我们会针对过拟合问题进行概念上的介绍，并且介绍如何防止过拟合的解决方法。</p>
+<h3 id="3、过拟合：Overfitting"><a href="#3、过拟合：Overfitting" class="headerlink" title="3、过拟合：Overfitting"></a>3、过拟合：Overfitting</h3><p>为了使训练数据与训练标签一致，而对模型过度训练，从而使得模型出现过拟合（over-fitting）现象。具体表现为，训练后的模型在训练集中正确率很高，但是在测试集中的变现与训练集相差悬殊，也可以叫做模型的泛化能力差。下图展示了分类模型中过拟合的现象。</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/过拟合概念图.png" alt="过拟合概念图"></p>
+<p>也就是说神经网络只对训练集有很好的效果而对测试集效果很差，模型的泛化能力弱这样的现象被称为过拟合现象。</p>
+<h3 id="4、过拟合的解决方法：Dropout"><a href="#4、过拟合的解决方法：Dropout" class="headerlink" title="4、过拟合的解决方法：Dropout"></a>4、过拟合的解决方法：Dropout</h3><p>Dropout是解决神经网络出现过拟合情况的一种常用的方法。Dropout方法是在一定的概率上（通常设置为0.5，原因是此时随机生成的网络结构最多）隐式的去除网络中的神经元，如下图：</p>
+<p><img src="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/Dropout.png" alt="Dropout"></p>
+<p>Tensorflow提供了Dropout方法来解决过拟合问题，在Tensorflow中可以很方便地使用。</p>
+<p>示例程序：</p>
+<p>导入Tensorflow模块以及从sklearn数据库导入数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_digits</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelBinarizer</span><br></pre></td></tr></table></figure>
+<p>定义添加层函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(inputs, in_size, out_size, n_layer, activation_function=None)</span>:</span><span class="comment">#在此激励函数（activation function）是None，代表线性关系</span></span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'layer'</span>):</span><br><span class="line">        layer_name = <span class="string">'layer%s'</span>%n_layer</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'weights'</span>):</span><br><span class="line">            Weights = tf.Variable(tf.random_normal([in_size, out_size]))<span class="comment">#变量中的值都是随机变量（random）的值</span></span><br><span class="line">            tf.summary.histogram(layer_name+<span class="string">'/weights'</span>, Weights)</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'biases'</span>):</span><br><span class="line">            biases = tf.Variable(tf.zeros([<span class="number">1</span>, out_size]) + <span class="number">0.1</span>)</span><br><span class="line">            tf.summary.histogram(layer_name + <span class="string">'/biases'</span>, biases)</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'Wx_plus_b'</span>):</span><br><span class="line">            Wx_plus_b = tf.matmul(inputs, Weights) + biases<span class="comment">#未激活的值存储在这里面</span></span><br><span class="line">            Wx_plus_b = tf.nn.dropout(Wx_plus_b, keep_prob)<span class="comment">#Dropout：此部分存储的值一部分不用</span></span><br><span class="line">        <span class="keyword">if</span> activation_function <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            outputs = Wx_plus_b</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            outputs = activation_function(Wx_plus_b)</span><br><span class="line">            tf.summary.histogram(layer_name + <span class="string">'/outputs'</span>, outputs)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+<p>准备数据。数据最后被分为训练集和测试集。train_test_split()函数是用来随机划分样本数据为训练集和测试集，参数介绍如下。</p>
+<p>train_X,test_X,train_y,test_y = train_test_split(train_data,train_target,test_size=0.3,random_state=5)：</p>
+<p>train_data：待划分样本数据；</p>
+<p>train_target：待划分样本数据的结果（标签）；</p>
+<p>test_size：测试数据占样本数据的比例，若整数则样本数量；random_state：设置随机数种子，保证每次都是同一个随机数。若为0或不填，则每次得到数据都不一样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">digits = load_digits()<span class="comment">#从sklearn.datasets导入的数据</span></span><br><span class="line">X = digits.data</span><br><span class="line">y = digits.target</span><br><span class="line">y = LabelBinarizer().fit_transform(y)</span><br><span class="line">X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span class="number">.3</span>)</span><br></pre></td></tr></table></figure>
+<p>定义占位符。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">keep_prob = tf.placeholder(tf.float32)</span><br><span class="line">xs = tf.placeholder(tf.float32, [<span class="literal">None</span>, <span class="number">64</span>])<span class="comment">#8x8</span></span><br><span class="line">ys = tf.placeholder(tf.float32, [<span class="literal">None</span>, <span class="number">10</span>])<span class="comment">#有10个输出</span></span><br></pre></td></tr></table></figure>
+<p>定义隐藏层和输出层。注意输入数据的个数和维度是两个不同的定义。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#add output layer</span></span><br><span class="line">l1 = add_layer(xs, <span class="number">64</span>, <span class="number">50</span>, <span class="string">'l1'</span>, activation_function=tf.nn.tanh)<span class="comment">#64个输入，隐藏层有100个神经元，激励函数是relu</span></span><br><span class="line">prediction = add_layer(l1, <span class="number">50</span>, <span class="number">10</span>, <span class="string">'l2'</span>, activation_function=tf.nn.softmax)<span class="comment">#l1隐藏层有100个神经元，size=10,输出是10个</span></span><br></pre></td></tr></table></figure>
+<p>定义损失函数，在这里采用交叉熵进行计算，并且采用tf.summary.scalar()函数在Tensorboard中进行显示。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys*tf.log(prediction), reduction_indices=[<span class="number">1</span>]))<span class="comment">#交叉熵,loss</span></span><br><span class="line">tf.summary.scalar(<span class="string">'loss'</span>, cross_entropy)</span><br></pre></td></tr></table></figure>
+<p>定义神经网络的训练优化器。TensorFlow优化器GradientDescentOptimizer是一个实现梯度下降算法的优化器。在这里取值是0.5表示以0.5的效率来最小化误差交叉熵（cross_entropy）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_step = tf.train.GradientDescentOptimizer(<span class="number">0.6</span>).minimize(cross_entropy)</span><br></pre></td></tr></table></figure>
+<p>开启会话窗口。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sess = tf.Session()</span><br><span class="line">merged = tf.summary.merge_all()<span class="comment">#将summary打包</span></span><br><span class="line"><span class="comment">#summary writer goes in here</span></span><br><span class="line">train_writer = tf.compat.v1.summary.FileWriter(<span class="string">'logs/train'</span>, sess.graph)<span class="comment">#将训练图线保存到指定位置</span></span><br><span class="line">test_writer = tf.compat.v1.summary.FileWriter(<span class="string">'logs/test'</span>, sess.graph)<span class="comment">#将测试图线保存到指定位置</span></span><br></pre></td></tr></table></figure>
+<p>执行训练程序。在这里keep_prob指保留结果的概率，一般在大量数据训练时，为了防止过拟合，添加Dropout层，设置一个0~1之间的小数。在这段程序中，训练次数设置为500次。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sess.run(tf.initialize_all_variables())</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">500</span>):</span><br><span class="line">    sess.run(train_step, feed_dict=&#123;xs: X_train, ys: y_train, keep_prob: <span class="number">0.5</span>&#125;)</span><br><span class="line">    <span class="keyword">if</span> i % <span class="number">50</span> == <span class="number">0</span>:</span><br><span class="line">        <span class="comment">#record loss</span></span><br><span class="line">        <span class="comment">#train_summary = sess.run(merge_summary,feed_dict =  &#123;...&#125;)#调用sess.run运行图，生成一步的训练过程数据  </span></span><br><span class="line">        train_result = sess.run(merged, feed_dict=&#123;xs:X_train, ys:y_train,keep_prob: <span class="number">1</span>&#125;)</span><br><span class="line">        test_result = sess.run(merged, feed_dict=&#123;xs:X_test, ys:y_test,keep_prob: <span class="number">1</span>&#125;)</span><br><span class="line">        <span class="comment">#train_writer.add_summary(train_summary,step)#调用train_writer的add_summary方法将训练过程以及训练步数保存</span></span><br><span class="line">        train_writer.add_summary(train_result, i)</span><br><span class="line">        test_writer.add_summary(test_result, i)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>张力元
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://Zhangliyuan-tech.github.io/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/" target="_blank" rel="noopener" title="Tensorflow搭建神经网络进阶篇">https://Zhangliyuan-tech.github.io/2021/04/27/Tensorflow搭建神经网络进阶篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+              <a href="/tags/Tensorflow/" rel="tag"><i class="fa fa-tag"></i> Tensorflow</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/AI/" rel="tag"><i class="fa fa-tag"></i> AI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/" rel="prev" title="Tensorflow搭建神经网络基础篇">
+      <i class="fa fa-chevron-left"></i> Tensorflow搭建神经网络基础篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/04/Tensorflow%E6%90%AD%E5%BB%BA%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88CNN%EF%BC%89/" rel="next" title="Tensorflow搭建卷积神经网络">
+      Tensorflow搭建卷积神经网络 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#写在前面"><span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1、可视化：Tensorboard"><span class="nav-text">1、可视化：Tensorboard</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）什么是Tensorboard"><span class="nav-text">（1）什么是Tensorboard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）示例程序"><span class="nav-text">（2）示例程序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、分类学习任务：Classification"><span class="nav-text">2、分类学习任务：Classification</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）什么是分类？"><span class="nav-text">（1）什么是分类？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）例程：MNIST手写体分类"><span class="nav-text">（2）例程：MNIST手写体分类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、过拟合：Overfitting"><span class="nav-text">3、过拟合：Overfitting</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、过拟合的解决方法：Dropout"><span class="nav-text">4、过拟合的解决方法：Dropout</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="张力元"
+      src="/images/author.jpg">
+  <p class="site-author-name" itemprop="name">张力元</p>
+  <div class="site-description" itemprop="description">在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Zhangliyuan-tech" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Zhangliyuan-tech" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">张力元</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+</body>
+</html>

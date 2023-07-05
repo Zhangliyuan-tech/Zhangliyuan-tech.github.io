@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhangliyuan-tech.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介本文针对MATLAB最常用的绘图方法进行简单的介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MATLAB学习笔记第四篇：绘制图像">
+<meta property="og:url" content="https://Zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/index.html">
+<meta property="og:site_name" content="张力元的个人站">
+<meta property="og:description" content="简介本文针对MATLAB最常用的绘图方法进行简单的介绍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011111903246.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011113022305.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011113137297.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011142534019.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011143839253.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011144011983.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011144640110.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011145851455.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011151225024.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011152228353.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011153151578.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011154721090.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011190753321.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011191533699.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011184107546.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011155521671.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011164134388.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011165444039.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011182657805.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011183127075.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011185053200.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011192013588.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011192309727.png">
+<meta property="article:published_time" content="2020-10-11T02:46:53.000Z">
+<meta property="article:modified_time" content="2020-10-11T12:05:52.000Z">
+<meta property="article:author" content="张力元">
+<meta property="article:tag" content="MATLAB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011111903246.png">
+
+<link rel="canonical" href="https://Zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MATLAB学习笔记第四篇：绘制图像 | 张力元的个人站</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">张力元的个人站</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">分享·技术·生活</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://Zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="张力元">
+      <meta itemprop="description" content="在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张力元的个人站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MATLAB学习笔记第四篇：绘制图像
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-11 10:46:53 / 修改时间：20:05:52" itemprop="dateCreated datePublished" datetime="2020-10-11T10:46:53+08:00">2020-10-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">MATLAB学习笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>本文针对MATLAB最常用的绘图方法进行简单的介绍。</p>
+<a id="more"></a>
+<h3 id="1、采用plot-绘图"><a href="#1、采用plot-绘图" class="headerlink" title="1、采用plot()绘图"></a>1、采用plot()绘图</h3><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">plot</span>(<span class="built_in">cos</span>(<span class="number">0</span>:<span class="built_in">pi</span>/<span class="number">20</span>:<span class="number">2</span>*<span class="built_in">pi</span>))</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011111903246.png" alt="image-20201011111903246"></p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">plot</span>(<span class="built_in">cos</span>(<span class="number">0</span>:<span class="built_in">pi</span>/<span class="number">20</span>:<span class="number">2</span>*<span class="built_in">pi</span>),<span class="string">'or'</span>)</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011113022305.png" alt="image-20201011113022305"></p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">plot</span>(<span class="built_in">cos</span>(<span class="number">0</span>:<span class="built_in">pi</span>/<span class="number">20</span>:<span class="number">2</span>*<span class="built_in">pi</span>),<span class="string">'--r'</span>)</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011113137297.png" alt="image-20201011113137297"></p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">hold</span> on</span><br><span class="line"><span class="built_in">plot</span>(<span class="built_in">cos</span>(<span class="number">0</span>:<span class="built_in">pi</span>/<span class="number">20</span>:<span class="number">2</span>*<span class="built_in">pi</span>),<span class="string">'or'</span>)</span><br><span class="line"><span class="built_in">plot</span>(<span class="built_in">sin</span>(<span class="number">0</span>:<span class="built_in">pi</span>/<span class="number">20</span>:<span class="number">2</span>*<span class="built_in">pi</span>),<span class="string">'--g'</span>)</span><br><span class="line"><span class="built_in">hold</span> off</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011142534019.png" alt="image-20201011142534019"></p>
+<p>在程序的开头和结尾添加hold on/hold off可以将程序中两个图线在一个界面上同时显示；若不添加，则只显示第二个（最新的）图线。</p>
+<h3 id="2、多图绘制"><a href="#2、多图绘制" class="headerlink" title="2、多图绘制"></a>2、多图绘制</h3><h4 id="（1）分别在两个窗口显示"><a href="#（1）分别在两个窗口显示" class="headerlink" title="（1）分别在两个窗口显示"></a>（1）分别在两个窗口显示</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-10</span>:<span class="number">0.01</span>:<span class="number">10</span>;</span><br><span class="line">y1=x.^<span class="number">2</span><span class="number">-8</span>;</span><br><span class="line">y2=<span class="built_in">exp</span>(x);</span><br><span class="line"><span class="built_in">figure</span>,<span class="built_in">plot</span>(x,y1);</span><br><span class="line">xlabel(<span class="string">'x=-10~10'</span>)</span><br><span class="line">ylabel(<span class="string">'The Value of y1'</span>)</span><br><span class="line"><span class="built_in">figure</span>,<span class="built_in">plot</span>(x,y2);</span><br></pre></td></tr></table></figure>
+<p>函数y1图线绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011143839253.png" alt="image-20201011143839253"></p>
+<p>函数y2图线绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011144011983.png" alt="image-20201011144011983"></p>
+<h4 id="（2）在一个窗口显示"><a href="#（2）在一个窗口显示" class="headerlink" title="（2）在一个窗口显示"></a>（2）在一个窗口显示</h4><p>在matlab中，同一窗口显示多个图，使用subplot函数实现。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-10</span>:<span class="number">0.01</span>:<span class="number">10</span>;</span><br><span class="line">y1=x.^<span class="number">2</span><span class="number">-8</span>;</span><br><span class="line">y2=<span class="built_in">exp</span>(x);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line"><span class="built_in">plot</span>(x,y1);</span><br><span class="line">xlabel(<span class="string">'x=-10~10'</span>)</span><br><span class="line">ylabel(<span class="string">'The Value of y1'</span>)</span><br><span class="line">axis equal</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line"><span class="built_in">plot</span>(x,y2);</span><br><span class="line">xlabel(<span class="string">'x=-10~10'</span>)</span><br><span class="line">ylabel(<span class="string">'The Value of y2'</span>)</span><br><span class="line">axis equal</span><br></pre></td></tr></table></figure>
+<p>两个函数在同一个界面中显示：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011144640110.png" alt="image-20201011144640110"></p>
+<p>但是这里存在一个问题，我们可以发现第二个函数显示的是一条直线而不是分窗情况下的曲线，但是我们放大后可以发现图线和分窗情况的曲线是相同的。</p>
+<p>这里涉及到坐标轴的设置和缩放问题，主要通过调整axis函数来进行视图上的调整，以下代码作为调整axis函数的展示：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-10</span>:<span class="number">0.01</span>:<span class="number">10</span>;</span><br><span class="line">y1=x.^<span class="number">2</span><span class="number">-8</span>;</span><br><span class="line">y2=<span class="built_in">exp</span>(x);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line"><span class="built_in">plot</span>(x,y1);</span><br><span class="line">xlabel(<span class="string">'x=-10~10'</span>)</span><br><span class="line">ylabel(<span class="string">'The Value of y1'</span>)</span><br><span class="line">axis([<span class="number">-10</span> <span class="number">10</span> <span class="number">-10</span> <span class="number">100</span>])</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line"><span class="built_in">plot</span>(x,y2);</span><br><span class="line">xlabel(<span class="string">'x=-10~10'</span>)</span><br><span class="line">ylabel(<span class="string">'The Value of y2'</span>)</span><br><span class="line">axis([<span class="number">-10</span> <span class="number">10</span> <span class="number">0</span> <span class="number">100</span>])</span><br></pre></td></tr></table></figure>
+<p>调整坐标轴后的函数图像显示：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011145851455.png" alt="image-20201011145851455"></p>
+<p>在这里我们规定了横坐标轴的范围是（-10，10），纵坐标轴的范围有所不同，函数y1的纵坐标范围是（-10，100），函数y2的纵坐标轴范围是（0，100）。通过调整坐标轴我们可以更加直观的观察到函数的形状，为我们分析函数的分布提供了有效的方式。</p>
+<p>其它关于axis函数的用法参考matlab官方文档。</p>
+<h3 id="3、图例标签"><a href="#3、图例标签" class="headerlink" title="3、图例标签"></a>3、图例标签</h3><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">0</span>:<span class="number">0.5</span>:<span class="number">4</span>*<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">h=<span class="built_in">cos</span>(x);</span><br><span class="line">w=<span class="number">1.</span>/(<span class="number">1</span>+<span class="built_in">exp</span>(-x));</span><br><span class="line">g=(<span class="number">1</span>/(<span class="number">2</span>*<span class="built_in">pi</span>*<span class="number">2</span>)^<span class="number">0.5</span>).*<span class="built_in">exp</span>((<span class="number">-1.</span>*(x<span class="number">-2</span>*<span class="built_in">pi</span>).^<span class="number">2.</span>/(<span class="number">2</span>*<span class="number">2</span>^<span class="number">2</span>)));</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">'bd-'</span>,x,h,<span class="string">'gp:'</span>,x,w,<span class="string">'ro-'</span>,x,g,<span class="string">'c^-'</span>);</span><br><span class="line">xlabel(<span class="string">'x=0~4\pi'</span>);</span><br><span class="line">ylabel(<span class="string">'values of y h w g'</span>);</span><br><span class="line">title(<span class="string">'Function Plots'</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">'sin(x)'</span>,<span class="string">'cos(x)'</span>,<span class="string">'Sigmoid'</span>,<span class="string">'Gauss function '</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011151225024.png" alt="image-20201011151225024"></p>
+<p>在这里我们设置了输入值x的范围是（0，4π），函数有四个，分别用不同的图线绘制，图中还标记了不同图线对应的图例。</p>
+<p>有时默认的图例位置不佳，我们可以调整图例的位置：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">0</span>:<span class="number">0.5</span>:<span class="number">4</span>*<span class="built_in">pi</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(x);</span><br><span class="line">h=<span class="built_in">cos</span>(x);</span><br><span class="line">w=<span class="number">1.</span>/(<span class="number">1</span>+<span class="built_in">exp</span>(-x));</span><br><span class="line">g=(<span class="number">1</span>/(<span class="number">2</span>*<span class="built_in">pi</span>*<span class="number">2</span>)^<span class="number">0.5</span>).*<span class="built_in">exp</span>((<span class="number">-1.</span>*(x<span class="number">-2</span>*<span class="built_in">pi</span>).^<span class="number">2.</span>/(<span class="number">2</span>*<span class="number">2</span>^<span class="number">2</span>)));</span><br><span class="line"><span class="built_in">plot</span>(x,y,<span class="string">'bd-'</span>,x,h,<span class="string">'gp:'</span>,x,w,<span class="string">'ro-'</span>,x,g,<span class="string">'c^-'</span>);</span><br><span class="line">xlabel(<span class="string">'x=0~4\pi'</span>);</span><br><span class="line">ylabel(<span class="string">'values of y h w g'</span>);</span><br><span class="line">title(<span class="string">'Function Plots'</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">'sin(x)'</span>,<span class="string">'cos(x)'</span>,<span class="string">'Sigmoid'</span>,<span class="string">'Gauss function '</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011152228353.png" alt="image-20201011152228353"></p>
+<p>可以看到图例的位置发生了改变，从右上角移动到了右下角。</p>
+<p>常用的图例位置关键词：northeast 右上角，southeast 右下角，northwest 左上角，southwest 左下角。</p>
+<h3 id="4、非线性绘图"><a href="#4、非线性绘图" class="headerlink" title="4、非线性绘图"></a>4、非线性绘图</h3><p>图中的坐标轴通过一定的数学改变得到新的坐标图，例如对x轴或者y轴取对数后进行绘图。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="built_in">logspace</span>(<span class="number">-1</span>,<span class="number">1</span>,<span class="number">100</span>);</span><br><span class="line">y=x.^<span class="number">2</span>;</span><br><span class="line"><span class="comment">%线性绘图</span></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line"><span class="built_in">plot</span>(x,y);</span><br><span class="line">title(<span class="string">'Plot'</span>);</span><br><span class="line"><span class="comment">%x轴采用log</span></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line">semilogx(x,y);</span><br><span class="line">title(<span class="string">'Semilogx'</span>);</span><br><span class="line"><span class="comment">%y轴采用log</span></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">semilogy(x,y);<span class="comment">%y轴采用log</span></span><br><span class="line">title(<span class="string">'Semilogy'</span>);</span><br><span class="line"><span class="comment">%两个轴都取对数</span></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">4</span>);</span><br><span class="line">loglog(x,y);</span><br><span class="line">title(<span class="string">'Loglog'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011153151578.png" alt="image-20201011153151578"></p>
+<h3 id="5、统计图的绘制"><a href="#5、统计图的绘制" class="headerlink" title="5、统计图的绘制"></a>5、统计图的绘制</h3><h4 id="（1）直方图的绘制"><a href="#（1）直方图的绘制" class="headerlink" title="（1）直方图的绘制"></a>（1）直方图的绘制</h4><p>直方图直观的反映了数据的一种分布方式，在工程中有着极为广泛的应用。例如在图像处理领域中，我们需要面对图像二值化的阈值选择问题，通过直方图进行一个灰度图的像素统计，我们可以直观的观察到合适的阈值点进行最优的灰度阈值分割；同样我们也可以通过直方图均衡化（Histogram Equalization）对图像进行均衡处理。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">%y是在1~1000之间产生的随机数，通过对随机数进行统计得到直方图</span></span><br><span class="line">y=<span class="built_in">randn</span>(<span class="number">1</span>,<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">hist(y,<span class="number">10</span>);</span><br><span class="line">title(<span class="string">'Bins = 10'</span>);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>);</span><br><span class="line">hist(y,<span class="number">50</span>);</span><br><span class="line">title(<span class="string">'Bins = 50'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011154721090.png" alt="image-20201011154721090"></p>
+<p>除了垂直于x轴分布的二维直方图，我们还可以绘制出垂直于y轴分布的二维直方图：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x=[<span class="number">1</span> <span class="number">2</span> <span class="number">5</span> <span class="number">4</span> <span class="number">8</span>];</span><br><span class="line">y=[x;<span class="number">1</span>:<span class="number">5</span>];</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line"><span class="comment">% bar(y,'stacked');</span></span><br><span class="line">bar(y,<span class="string">'stacked'</span>);</span><br><span class="line">title(<span class="string">'Stacked'</span>);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line">barh(y);</span><br><span class="line">title(<span class="string">'Horizontal'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011190753321.png" alt="image-20201011190753321"></p>
+<p>在本段程序中，语句bar(y,’stacked’)里还有一个参量’stacked’，在这里通过了这个参量实现了两行矩阵中元素占比在一个直方中显示，若去掉这个参量，结果如下图所示：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011191533699.png" alt="image-20201011191533699"></p>
+<h4 id="（2）圆饼图的绘制"><a href="#（2）圆饼图的绘制" class="headerlink" title="（2）圆饼图的绘制"></a>（2）圆饼图的绘制</h4><p>除了通过直方图进行数据的统计，我们还可以通过圆饼图对数据进行统计。</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a=[<span class="number">10</span> <span class="number">5</span> <span class="number">20</span> <span class="number">30</span>];</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>);</span><br><span class="line">pie(a);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>);</span><br><span class="line">pie(a,[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">3</span>);</span><br><span class="line">pie3(a,[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>]);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011184107546.png" alt="image-20201011184107546"></p>
+<p>在这里我们要注意的是饼图的比例计算问题，饼图中比率的获得：X中的元素x[i]/sum(X)，也就是说单个元素的值/所有元素的值。若要将所有元素所占比例的色块区分开，可以设置pie函数中矩阵的参数。</p>
+<h3 id="6、加入函数公式"><a href="#6、加入函数公式" class="headerlink" title="6、加入函数公式"></a>6、加入函数公式</h3><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x=linspace(<span class="number">0</span>,<span class="number">3</span>);</span><br><span class="line">y=x.^<span class="number">2.</span>*sin(x);</span><br><span class="line">plot(x,y);</span><br><span class="line">line([<span class="number">2</span>,<span class="number">2</span>], [<span class="number">0</span>,<span class="number">2</span>^<span class="number">2</span>*sin(<span class="number">2</span>)]);</span><br><span class="line">str = '$$ \int_&#123;<span class="number">0</span>&#125;^&#123;<span class="number">2</span>&#125; x^<span class="number">2</span>\sin(x) dx $$';%laTex公式表达式</span><br><span class="line">text(<span class="number">0.25</span>,<span class="number">2.5</span>,str,'Interpreter','latex');%表示公式所在图中的位置</span><br><span class="line">annotation('arrow', 'X', [<span class="number">0.32</span>,<span class="number">0.5</span>],'Y',[<span class="number">0.6</span>,<span class="number">0.4</span>]);%语句代表的是箭头的X和Y的位置</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011155521671.png" alt="image-20201011155521671"></p>
+<p>图中有一条直线，起点为（2，0），终点为（2，2^2*sin（2））。函数line的用法如下：</p>
+<p>（1）line([起点横坐标，终点横坐标],[起点纵坐标，终点纵坐标]，’linestyle’，’线形’，’color’，’颜色’) 其中线形和颜色参考plot中的’-‘和’r’。</p>
+<p>（2）line(A,B)中，A和B是相同大小的矩阵，会在对应的每一列做一条直线；同理在line(A,B,C)中，相应地会在三维空间中画一条线。在这里所说的A,B,C均是N*N的矩阵，得到的线条的数目就是矩阵的列数N列。</p>
+<h3 id="7、3D图"><a href="#7、3D图" class="headerlink" title="7、3D图"></a>7、3D图</h3><h4 id="（1）简单的3D图绘制"><a href="#（1）简单的3D图绘制" class="headerlink" title="（1）简单的3D图绘制"></a>（1）简单的3D图绘制</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">0</span>:<span class="number">0.1</span>:<span class="number">3</span>*<span class="built_in">pi</span>;</span><br><span class="line">z1=<span class="built_in">sin</span>(x);</span><br><span class="line">z2=<span class="built_in">sin</span>(<span class="number">2</span>*x);</span><br><span class="line">z3=<span class="built_in">sin</span>(<span class="number">3</span>*x);</span><br><span class="line"></span><br><span class="line">y1=<span class="built_in">zeros</span>(<span class="built_in">size</span>(x));</span><br><span class="line">y3=<span class="built_in">ones</span>(<span class="built_in">size</span>(x));</span><br><span class="line">y2=y3./<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">plot3</span>(x,y1,z1,<span class="string">'r'</span>,x,y2,z2,<span class="string">'b'</span>,x,y3,z3,<span class="string">'g'</span>);</span><br><span class="line"></span><br><span class="line">grid on;</span><br><span class="line">xlabel(<span class="string">'x-axis'</span>);</span><br><span class="line">ylabel(<span class="string">'y-axis'</span>);</span><br><span class="line">zlabel(<span class="string">'z-axis'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011164134388.png" alt="image-20201011164134388"></p>
+<p>本程序中，zeros函数和ones函数分别代表全一和全零的矩阵操作。在这里x是一个从0到2π的一个向量，而size（x）函数可以得到x这个向量的大小，之后通过zeros函数和ones函数可以将向量转化为一个标量数。另外，在本例程中，grid on表示图中显示网格，相同的grid off表示关闭网格的显示。</p>
+<h4 id="（2）3D图的绘制"><a href="#（2）3D图的绘制" class="headerlink" title="（2）3D图的绘制"></a>（2）3D图的绘制</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">y=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">[X,Y]=<span class="built_in">meshgrid</span>(x,y);</span><br><span class="line">Z=X.*<span class="built_in">exp</span>(-X.^<span class="number">2</span>-Y.^<span class="number">2</span>);</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">mesh(X,Y,Z);</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line">surf(X,Y,Z);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011165444039.png" alt="image-20201011165444039"></p>
+<p>本例程中[X,Y]通过meshgrid函数创建了一个矩阵，meshgrid函数的参数是矩阵的大小。Z是所要实现的函数，输入参数是一个二维向量。在这里使用了mesh函数和surf函数进行三维曲面的绘制，可以看到二者都可以绘制出函数的图像，但是二者又有所不同，mesh函数侧重于绘制出由彩色线条组成的三维网格图，而surf函数侧重于通过色彩描述三维图像的分布。</p>
+<p>当执行以下代码时，我们可以发现有如下变化：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">y=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">[X,Y]=<span class="built_in">meshgrid</span>(x,y);</span><br><span class="line">Z=X.*<span class="built_in">exp</span>(-X.^<span class="number">2</span>-Y.^<span class="number">2</span>);</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">mesh(X,Y,Z);</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>);</span><br><span class="line">surf(X,Y,Z,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011182657805.png" alt="image-20201011182657805"></p>
+<p>可以观察到，图中通过色彩变化描述了整体的幅度上的变化。</p>
+<p>我们还可以使用contour函数观察三维图像的梯度变化：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">y=<span class="number">-3.5</span>:<span class="number">0.2</span>:<span class="number">3.5</span>;</span><br><span class="line">[X,Y]=<span class="built_in">meshgrid</span>(x,y);</span><br><span class="line">Z=X.*<span class="built_in">exp</span>(-X.^<span class="number">2</span>-Y.^<span class="number">2</span>);</span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">mesh(X,Y,Z);</span><br><span class="line">axis square;</span><br><span class="line">subplot(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>);</span><br><span class="line">contour(X,Y,Z);</span><br><span class="line">axis square;</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011183127075.png" alt="image-20201011183127075"></p>
+<h4 id="（3）直方3D图的绘制"><a href="#（3）直方3D图的绘制" class="headerlink" title="（3）直方3D图的绘制"></a>（3）直方3D图的绘制</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">x=[<span class="number">1</span> <span class="number">2</span> <span class="number">5</span> <span class="number">4</span> <span class="number">8</span>];</span><br><span class="line">y=[x;<span class="number">1</span>:<span class="number">5</span>];</span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>);</span><br><span class="line">bar(x);</span><br><span class="line">title(<span class="string">'A bargraph of vector x'</span>);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>);</span><br><span class="line">bar(y);</span><br><span class="line">title(<span class="string">'A bargraph of vector y'</span>);</span><br><span class="line"></span><br><span class="line">subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">3</span>);</span><br><span class="line">bar3(y);</span><br><span class="line">title(<span class="string">'A sD bargraph'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011185053200.png" alt="image-20201011185053200"></p>
+<p>图一绘制了x的直方分布图，其中x是一个一行五列的矩阵（也可称向量）；图二绘制了y的直方分布图，其中y是一个两行五列的矩阵；图三则绘制了y的3D直方图。</p>
+<h3 id="8、练习题目"><a href="#8、练习题目" class="headerlink" title="8、练习题目"></a>8、练习题目</h3><h4 id="（1）Exercise-One"><a href="#（1）Exercise-One" class="headerlink" title="（1）Exercise One"></a>（1）Exercise One</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">t=<span class="built_in">linspace</span>(<span class="number">1</span>,<span class="number">2</span>);</span><br><span class="line">f=t.*t;</span><br><span class="line">g=<span class="built_in">sin</span>(<span class="number">2.</span>*<span class="built_in">pi</span>*t);</span><br><span class="line"><span class="built_in">plot</span>(t,f,<span class="string">'k-'</span>,t,g,<span class="string">'ro'</span>);</span><br><span class="line">xlabel(<span class="string">'Time(ms)'</span>);</span><br><span class="line">ylabel(<span class="string">'f(t)'</span>);</span><br><span class="line">title(<span class="string">'Mini Assignment #1'</span>);</span><br><span class="line"><span class="built_in">legend</span>(<span class="string">'t^2'</span>,<span class="string">'sin(2\pit)'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>);</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011192013588.png" alt="image-20201011192013588"></p>
+<h4 id="（2）Exercise-Two"><a href="#（2）Exercise-Two" class="headerlink" title="（2）Exercise Two"></a>（2）Exercise Two</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">hold</span> on</span><br><span class="line">t=<span class="number">0</span>:<span class="number">0.01</span>:<span class="number">10</span>;</span><br><span class="line">f=<span class="built_in">sin</span>(<span class="built_in">pi</span>.*t.*t/<span class="number">4</span>);</span><br><span class="line"><span class="built_in">plot</span>(t,f);</span><br><span class="line"></span><br><span class="line">x=<span class="number">0</span>:<span class="number">0.2</span>:<span class="number">10</span>;</span><br><span class="line">y=<span class="built_in">sin</span>(<span class="built_in">pi</span>.*x.*x/<span class="number">4</span>);</span><br><span class="line">stem(x,y);</span><br><span class="line"><span class="built_in">hold</span> off</span><br></pre></td></tr></table></figure>
+<p>绘图结果：</p>
+<p><img src="/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/image-20201011192309727.png" alt="image-20201011192309727"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>张力元
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://Zhangliyuan-tech.github.io/2020/10/11/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E5%9B%9B%E7%AF%87%EF%BC%9A%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%98%E5%88%B6/" target="_blank" rel="noopener" title="MATLAB学习笔记第四篇：绘制图像">https://Zhangliyuan-tech.github.io/2020/10/11/MATLAB学习笔记第四篇：图像的绘制/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MATLAB/" rel="tag"><i class="fa fa-tag"></i> MATLAB</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/17/MATLAB%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC%E4%B8%89%E7%AF%87%EF%BC%9A%E7%9F%A9%E9%98%B5%E6%93%8D%E4%BD%9C%E8%A1%A5%E5%85%85/" rel="prev" title="MATLAB学习笔记第三篇：矩阵操作补充">
+      <i class="fa fa-chevron-left"></i> MATLAB学习笔记第三篇：矩阵操作补充
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/25/Python-Matplotlib%E7%BB%98%E5%9B%BE/" rel="next" title="Python-Matplotlib绘图">
+      Python-Matplotlib绘图 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1、采用plot-绘图"><span class="nav-text">1、采用plot()绘图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、多图绘制"><span class="nav-text">2、多图绘制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）分别在两个窗口显示"><span class="nav-text">（1）分别在两个窗口显示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）在一个窗口显示"><span class="nav-text">（2）在一个窗口显示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、图例标签"><span class="nav-text">3、图例标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、非线性绘图"><span class="nav-text">4、非线性绘图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、统计图的绘制"><span class="nav-text">5、统计图的绘制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）直方图的绘制"><span class="nav-text">（1）直方图的绘制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）圆饼图的绘制"><span class="nav-text">（2）圆饼图的绘制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、加入函数公式"><span class="nav-text">6、加入函数公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7、3D图"><span class="nav-text">7、3D图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）简单的3D图绘制"><span class="nav-text">（1）简单的3D图绘制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）3D图的绘制"><span class="nav-text">（2）3D图的绘制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（3）直方3D图的绘制"><span class="nav-text">（3）直方3D图的绘制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8、练习题目"><span class="nav-text">8、练习题目</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）Exercise-One"><span class="nav-text">（1）Exercise One</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）Exercise-Two"><span class="nav-text">（2）Exercise Two</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="张力元"
+      src="/images/author.jpg">
+  <p class="site-author-name" itemprop="name">张力元</p>
+  <div class="site-description" itemprop="description">在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Zhangliyuan-tech" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Zhangliyuan-tech" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">张力元</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+</body>
+</html>

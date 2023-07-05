@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhangliyuan-tech.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="写在前面这系列博客文章将跟随莫烦老师学习的Tensorflow建立神经网络系列内容重新进行系统的整理和归纳。本人水平有限，在本文中若有不足之处，还请各位谅解。 另外，感谢莫烦老师出品的深度学习系列教程，我从该教程获益良多。希望越来越多的IT从业者能够分享自己的技术成长经历，也希望自己能够将技术成长路线记录下来和大家交流。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tensorflow搭建神经网络基础篇">
+<meta property="og:url" content="https://Zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/index.html">
+<meta property="og:site_name" content="张力元的个人站">
+<meta property="og:description" content="写在前面这系列博客文章将跟随莫烦老师学习的Tensorflow建立神经网络系列内容重新进行系统的整理和归纳。本人水平有限，在本文中若有不足之处，还请各位谅解。 另外，感谢莫烦老师出品的深度学习系列教程，我从该教程获益良多。希望越来越多的IT从业者能够分享自己的技术成长经历，也希望自己能够将技术成长路线记录下来和大家交流。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/Tensorflow%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE.jpg">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/%E7%A5%9E%E7%BB%8F%E5%85%83%E8%BE%93%E5%85%A5%E5%92%8C%E8%BE%93%E5%87%BA%E7%BB%93%E6%9E%84%E5%9B%BE.jpeg">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/sigmoid%20function.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/tanh%20function.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/ReLU%20function.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/%E6%90%AD%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.PNG">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/%E6%95%A3%E7%82%B9%E5%9B%BE.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%AD%A6%E4%B9%A0%E7%BB%93%E6%9E%9C.png">
+<meta property="og:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/Momentum%E7%AE%97%E6%B3%95%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%B9%B3%E6%BB%91%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg">
+<meta property="article:published_time" content="2021-04-19T09:28:23.000Z">
+<meta property="article:modified_time" content="2021-04-28T14:07:42.000Z">
+<meta property="article:author" content="张力元">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Tensorflow">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/Tensorflow%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE.jpg">
+
+<link rel="canonical" href="https://Zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Tensorflow搭建神经网络基础篇 | 张力元的个人站</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">张力元的个人站</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">分享·技术·生活</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://Zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="张力元">
+      <meta itemprop="description" content="在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张力元的个人站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tensorflow搭建神经网络基础篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-19 17:28:23" itemprop="dateCreated datePublished" datetime="2021-04-19T17:28:23+08:00">2021-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-04-28 22:07:42" itemprop="dateModified" datetime="2021-04-28T22:07:42+08:00">2021-04-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">Tensorflow搭建神经网络</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>这系列博客文章将跟随莫烦老师学习的Tensorflow建立神经网络系列内容重新进行系统的整理和归纳。本人水平有限，在本文中若有不足之处，还请各位谅解。</p>
+<p>另外，感谢莫烦老师出品的深度学习系列教程，我从该教程获益良多。希望越来越多的IT从业者能够分享自己的技术成长经历，也希望自己能够将技术成长路线记录下来和大家交流。</p>
+<a id="more"></a>
+<h3 id="1、神经网络的梯度下降"><a href="#1、神经网络的梯度下降" class="headerlink" title="1、神经网络的梯度下降"></a>1、神经网络的梯度下降</h3><p>在神经网络的基本运行机制中，其实最核心的问题就是如何寻找到一个最优解的问题，特别是寻找一个全局最优解。然而，全局最优解是很难得到的，而且在随着数据量的不断增加，通常一些网络会陷入局部最优解的情境中。因此，对于神经网络，我们需要研究其的优化方法，这也就是一种优化问题。</p>
+<p>在生活中我们经常会遇到许多优化问题，在实际的生活中我们的大脑进行非线性的思考后，综合了当前一些信息，这些信息可以看作是不同的输入变量。在处理这些信息时，类似赋予了这些信息不同的权重，最后输出基于这些信息的近似最优解。</p>
+<p>梯度下降的具体内容在这不做具体的描述，感兴趣的朋友可以查阅一些专业书籍资料。梯度下降最核心的目的就是所谓的<strong>快速收敛</strong>，得到最小值。</p>
+<h3 id="2、What-is-Tensorflow"><a href="#2、What-is-Tensorflow" class="headerlink" title="2、What is Tensorflow"></a>2、What is Tensorflow</h3><p>Tensorflow是谷歌开发的一款神经网络框架，采用数据流图来进行数值计算的开源软件库。Tensorflow极大的降低了深度学习网络的开发成本和开发难度，对初学者极其友好。目前，Tensorflow已经成为了最主流的开源神经网络框架，并且不断地完善。</p>
+<h3 id="3、Tensorflow基础架构之处理结构"><a href="#3、Tensorflow基础架构之处理结构" class="headerlink" title="3、Tensorflow基础架构之处理结构"></a>3、Tensorflow基础架构之处理结构</h3><p>前文所述，Tensorflow基本的工作机制是数据流图：</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/Tensorflow数据流图.jpg" alt="Tensorflow数据流图"></p>
+<p>首先需要建立一个数据流图，之后将我们的数据放在数据流图里计算，节点代表了一个数学操作，线代表节点输出数据的传递方向，代表两个节点之间的相互联系。在Tensorflow中，数据是以张量（Tensor）存储的，张量可以理解为不同维度组成的数据结构，一维张量代表向量，二维张量代表矩阵，三维和四维……数据从节点flow流向另一个节点，这就是Tensorflow。</p>
+<p>Tensorflow很巧妙的将其数据处理机制进行了概括，或许当看到Tensorflow时，也在不断提醒我们读懂其独特的含义。</p>
+<h3 id="4、Tensorflow基本内容之会话机制（Session）"><a href="#4、Tensorflow基本内容之会话机制（Session）" class="headerlink" title="4、Tensorflow基本内容之会话机制（Session）"></a>4、Tensorflow基本内容之会话机制（Session）</h3><p>由Tensorflow的处理结构可知，对于一个任务，我们所需要的模型已经被定义在数据流图中，模型的节点设置，数据流的传递方向，各节点之间的关系在理论上可以通过一个数据流图清晰的展示出来。</p>
+<p>然而，定义好的模型就像一台机器，我们需要给它数据让它运行起来，它才能够按照我们预期设计的功能实现某种预期的结果。Session在这里充当了启动器的角色。定义的数据流图想要运行起来，必须在Session中启动，之后由Session将数据流图定义的节点部署到CPU、GPU上实现 计算，同时应用优化算法进行计算的优化。</p>
+<p>在这里附上会话控制的Python代码，由于Tensorflow的版本更新导致的一些代码语句产生问题，还请结合实际情况进行修改：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf <span class="comment">#导入tensorflow</span></span><br><span class="line">matrixl = tf.constant([[<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>]])<span class="comment">#矩阵一</span></span><br><span class="line">matrix2 = tf.constant([[<span class="number">2</span>],[<span class="number">2</span>],[<span class="number">2</span>]])<span class="comment">#矩阵二</span></span><br><span class="line">product = tf.matmul(matrixl, matrix2)<span class="comment">#进行矩阵运算</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#两种会话控制方法#</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#会话控制1</span></span><br><span class="line">sess = tf.compat.v1.Session()</span><br><span class="line">result  =sess.run(product)</span><br><span class="line">print(result)</span><br><span class="line">sess.close()</span><br><span class="line"></span><br><span class="line"><span class="comment">#会话控制2</span></span><br><span class="line"><span class="keyword">with</span> tf.compat.v1.Session() <span class="keyword">as</span> sess:<span class="comment">#运行到Session结束最后自动关闭Session</span></span><br><span class="line">    result2 = sess.run(product)</span><br><span class="line">    print(result2)</span><br></pre></td></tr></table></figure>
+<p>这里调用了计算机的GPU来进行计算，当计算完成后会话窗口会自动关闭。个人推荐会话控制2，相较于会话控制1可以避免忘记输入关闭会话语句。当然，会话控制1更容易理解。</p>
+<h3 id="5、变量：Variable"><a href="#5、变量：Variable" class="headerlink" title="5、变量：Variable"></a>5、变量：Variable</h3><p>在Tensorflow中，一串字符串被定义后才可以表示一个变量；变量被定义后必须对其进行初始化操作。</p>
+<p>在Tensorflow官方例程中，对变量的解释是“tf.Variable 对象会存储在训练期间访问的可变、类似于 tf.Tensor 的值，以更简单地实现自动微分。”</p>
+<h4 id="（1）-初始化值"><a href="#（1）-初始化值" class="headerlink" title="（1） 初始化值"></a>（1） 初始化值</h4><p>变量tf.Variable()构建需要一个初始化值，这个初始化值可以是一个任意大小，任意维度的张量。</p>
+<p>如果一个变量初始化的时候需要调用另外一个变量的初始化值时，需要initialized_value()获得这个被调用的变量的初始化值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line">a = tf.Variable(<span class="number">0.06</span>, name=<span class="string">'a'</span>)</span><br><span class="line">b = tf.Variable(a.initialized_value()*<span class="number">2.0</span>, name=<span class="string">'b'</span>)</span><br><span class="line"><span class="comment"># init = tf.initialize_all_variables()#初始化变量，定义了变量后必须使用</span></span><br><span class="line">init = tf.global_variables_initializer()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.compat.v1.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(init)</span><br><span class="line">    print(sess.run(a))</span><br><span class="line">    print(sess.run(b))</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">a:</span><br><span class="line"><span class="number">0.06</span></span><br><span class="line">b:</span><br><span class="line"><span class="number">0.12</span></span><br><span class="line">Process finished <span class="keyword">with</span> exit code <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>在tf.Variable里有一个name参数，其主要作用是在TensorBoard中查看图的结构时，方便查看变量。</p>
+<h4 id="（2）维度变换"><a href="#（2）维度变换" class="headerlink" title="（2）维度变换"></a>（2）维度变换</h4><p>变量构建完成后，变量的大小和维度已经固定好了。如果想改变变量的维度大小，可以通过reshape操作进行修改。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line">a = tf.Variable([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>], name=<span class="string">'a'</span>)</span><br><span class="line">reshape_a = tf.reshape(a, [<span class="number">3</span>,<span class="number">3</span>])</span><br><span class="line"><span class="comment"># init = tf.initialize_all_variables()#初始化变量，定义了变量后必须使用</span></span><br><span class="line">init = tf.global_variables_initializer()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.compat.v1.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(init)</span><br><span class="line">    print(<span class="string">"a:"</span>)</span><br><span class="line">    print(sess.run(a))</span><br><span class="line">    print(<span class="string">"reshape_a:"</span>)</span><br><span class="line">    print(sess.run(reshape_a))</span><br></pre></td></tr></table></figure>
+<h3 id="6、占位符：Placeholder"><a href="#6、占位符：Placeholder" class="headerlink" title="6、占位符：Placeholder"></a>6、占位符：Placeholder</h3><p>tf.placeholder表示一个占位符，这是由Tensorflow的运行机制所决定的。Tensorflow将定义和运行分为两部分，定义的内容需要放入运行中才能执行；变量的执行已经非常清晰的反映了Tensorflow的运行机制。placeholder在必要时会分配内存，并且将封装数据的tensor传递到session中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tf.placeholder(dtype,shape=<span class="literal">None</span>,name=<span class="literal">None</span>)</span><br><span class="line"><span class="comment">#dtype：数据类型。例如：tf.float32、tf.float64...</span></span><br><span class="line"><span class="comment">#shape：数据大小，主要描述数据的维度。例如：一维、二维...</span></span><br><span class="line"><span class="comment">#name：数据名称。</span></span><br></pre></td></tr></table></figure>
+<p>tf.placeholder定义的数据在session中run时需要将数据设置在feed_dict中，给定设置值的大小。</p>
+<p>示例1：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">input1 = tf.placeholder(tf.float32)<span class="comment">#给定数据类型float32</span></span><br><span class="line">input2 = tf.placeholder(tf.float32)</span><br><span class="line"></span><br><span class="line">output = tf.multiply(input1, input2)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sees:</span><br><span class="line">     print(sees.run(output, feed_dict=&#123;input1: [<span class="number">7.0</span>], input2: [<span class="number">2.0</span>]&#125;))</span><br></pre></td></tr></table></figure>
+<p>结果1：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">14.</span>]</span><br><span class="line"></span><br><span class="line">Process finished <span class="keyword">with</span> exit code <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>示例2：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">x = tf.placeholder(tf.string)</span><br><span class="line"></span><br><span class="line">init = tf.global_variables_initializer()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(init)</span><br><span class="line">    output = sess.run(x, feed_dict=&#123;x:<span class="string">'Hello World'</span>&#125;)</span><br><span class="line">    print(output)</span><br></pre></td></tr></table></figure>
+<p>结果2：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hello World</span><br><span class="line"></span><br><span class="line">Process finished <span class="keyword">with</span> exit code <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>示例3：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">variable_1 = tf.Variable(tf.random_normal([<span class="number">1</span>, <span class="number">2</span>], stddev=<span class="number">1</span>, seed=<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">x = tf.placeholder(tf.float32, shape=(<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">x1 = tf.constant([<span class="number">0.7</span>, <span class="number">0.9</span>])</span><br><span class="line"></span><br><span class="line">a = x + variable_1</span><br><span class="line">b = x1 + variable_1</span><br><span class="line">init = tf.global_variables_initializer()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(init)</span><br><span class="line">    output_a = sess.run(a, feed_dict=&#123;x : [[<span class="number">0.3</span>, <span class="number">0.6</span>]]&#125;)<span class="comment">#在这里[0.3, 0.6]是一个整体量</span></span><br><span class="line">    output_b = sess.run(b)</span><br><span class="line">    print(sess.run(variable_1))</span><br><span class="line">    print(output_a)</span><br><span class="line">    print(output_b)</span><br></pre></td></tr></table></figure>
+<p>结果3：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[[<span class="number">-0.8113182</span>  <span class="number">1.4845988</span>]]</span><br><span class="line">[[<span class="number">-0.5113182</span>  <span class="number">2.0845988</span>]]</span><br><span class="line">[[<span class="number">-0.11131823</span>  <span class="number">2.3845987</span> ]]</span><br><span class="line"></span><br><span class="line">Process finished <span class="keyword">with</span> exit code <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="7、激励函数：Activation-Function"><a href="#7、激励函数：Activation-Function" class="headerlink" title="7、激励函数：Activation Function"></a>7、激励函数：Activation Function</h3><h4 id="（1）什么是激励函数？"><a href="#（1）什么是激励函数？" class="headerlink" title="（1）什么是激励函数？"></a>（1）什么是激励函数？</h4><p>定义：神经网络中的每个节点接受输入值，并将输入值传递给下一层。输入节点会将输入属性值直接传递给下一层（隐层或输出层）。在神经网络中，隐层和输出层节点的输入和输出之间具有函数关系，这个函数称为激励函数（Activation Function）。</p>
+<h4 id="（2）为什么要使用激励函数？"><a href="#（2）为什么要使用激励函数？" class="headerlink" title="（2）为什么要使用激励函数？"></a>（2）为什么要使用激励函数？</h4><p>假设一个神经网络可以看成一个线性的函数y = K*x，对于一个简单的线性问题可以有效的解决。但是，生活中大多数都是一些非线性的场景，显然线性的神经网络模型很难有效的处理这些非线性的输入数据。</p>
+<p>如何使神经网络更好的实现对非线性数据的处理呢？答案就是在神经网络中加入激励函数。激励函数在这里充当了这样一个转换器角色。y =AF<em> K</em>x，利用AF这样一个非线性函数即可实现一个非线性的输出。</p>
+<p>当神经网络不包含激励函数时，神经网络的每一层节点的输入都是上层输出的线性函数 ，因此无论多少层的神经网络，上一层的输出值都会直接的传递给下一层作为输入，下一层的输出又传递给下下层……每一层的输入和输出都是线性的关系，与没有隐藏层效果相当，因此最后的输出结果相当于多层的线性关系的叠加，这也就是最原始的感知机（Perceptron）。显然这样的一个网络能力是有限的。当我们在每一层的后面添加一个激活函数，就可以使上一层的输出和下一层的输入之间具有一个函数关系，这个函数就是激活函数。</p>
+<p>激励函数的作用主要是向神经网络中引入非线性关系，因此激励函数通常是非线性并且是可微分的。引入非线性关系后的神经网络相较于线性关系的表示能力更强。</p>
+<p>神经元输入和输出结构图：</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/神经元输入和输出结构图.jpeg" alt="神经元输入和输出结构图"></p>
+<h4 id="（3）常见的激励函数"><a href="#（3）常见的激励函数" class="headerlink" title="（3）常见的激励函数"></a>（3）常见的激励函数</h4><p>sigmoid函数：</p>
+<script type="math/tex; mode=display">
+sigmoid(x) = \frac{1}{1+exp(-x)}</script><p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/sigmoid function.png" alt="sigmoid function"></p>
+<p>sigmoid函数能够将输入的值变换到0和1之间，对于非常大的负数，其输出结果是0；对于非常大的正数，其输出结果是1。</p>
+<p>sigmoid函数的不足：</p>
+<p>（a）在深度神经网络中梯度反向传播时导致梯度爆炸和梯度消失，其中梯度爆炸发生的概率非常小，而梯度消失发生的概率比较大。</p>
+<p>（b）sigmoid函数的输出不是零均值的。这会导致该层经过非线性函数输出的非零均值的输出作为下一层的神经元的输入。在反向传播过程中，很容易出现只向一个方向更新使得收敛缓慢。当然，应用batch训练由于输入多个数据，因此还可以缓解这样的问题。</p>
+<p>tanh函数：</p>
+<script type="math/tex; mode=display">
+tanh(x) = \frac{exp(x)-exp(-x)}{exp(x)+exp(-x)}</script><p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/tanh function.png" alt="tanh function"></p>
+<p>tanh函数解决了sigmoid函数输出不是零均值的问题，但是仍存在梯度爆炸或者梯度消失的问题和幂运算的问题。</p>
+<p>ReLU函数：</p>
+<script type="math/tex; mode=display">
+ReLU(x) = max(0,x)</script><p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/ReLU function.png" alt="ReLU function"></p>
+<p>ReLU的几大优点：</p>
+<p>（a）在正区间解决了梯度消失（gradient vanishing）问题 。</p>
+<p>（b）计算速度非常快，只需要判断输入是否大于0。</p>
+<p>（c）收敛速度远快于sigmoid和tanh。</p>
+<p>ReLU也存在一些问题：</p>
+<p>（a）ReLU的输出并不是零均值的。</p>
+<p>（b）存在某些神经元可能永远不会被激活导致相应的参数永远无法被更新。</p>
+<h3 id="8、定义or添加一个层"><a href="#8、定义or添加一个层" class="headerlink" title="8、定义or添加一个层"></a>8、定义or添加一个层</h3><p>导入tensorflow模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br></pre></td></tr></table></figure>
+<p>定义添加神经层的函数def add_layer()，函数包含四个参数：输入值、输入的大小、输出的大小、激励函数。和神经元的输入输出结构图做个对比可以发现二者似乎具有类似的结构，只是神经元的输入可以是多个值，输出只有一个。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(inputs, in_size, out_size, activation_function=None)</span></span></span><br></pre></td></tr></table></figure>
+<p>定义权重（weights）和偏移量（biases）。</p>
+<p>在生成初始参数时，采用随机变量比全部为零的要更好，因此在这里weights设置为一个in_size行，out_size列的随机变量矩阵。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Weights = tf.Variable(tf.random_normal([in_size, out_size]))</span><br></pre></td></tr></table></figure>
+<p>在机器学习中，biases不推荐值为0，因此可以增加一个量，例如0.1。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">biases = tf.Variable(tf.zeros([<span class="number">1</span>, out_size]) + <span class="number">0.1</span>)</span><br></pre></td></tr></table></figure>
+<p>定义Wx_plus_b，即神经网络未激活的值。当activation_function——激励函数为None时，输出就是当前的预测值——Wx_plus_b，不为None时，就把Wx_plus_b传到activation_function()函数中得到输出。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Wx_plus_b = tf.matmul(inputs, Weights) + biases</span><br><span class="line"><span class="keyword">if</span> activation_function <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    outputs = Wx_plus_b</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    outputs = activation_function(Wx_plus_b)</span><br></pre></td></tr></table></figure>
+<p>最后结果返回输出，添加神经层函数def add_layer()定义完成。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span>  outputs</span><br></pre></td></tr></table></figure>
+<h3 id="9、搭建第一个神经网络"><a href="#9、搭建第一个神经网络" class="headerlink" title="9、搭建第一个神经网络"></a>9、搭建第一个神经网络</h3><p>导入所需模块，本次导入tensorflow和numpy即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<p>构造添加神经层函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(inputs, in_size, out_size, activation_function=None)</span>:</span></span><br><span class="line">    Weights = tf.Variable(tf.random_normal([in_size, out_size]))</span><br><span class="line">    biases = tf.Variable(tf.zeros([<span class="number">1</span>, out_size]) + <span class="number">0.1</span>)</span><br><span class="line">    Wx_plus_b = tf.matmul(inputs, Weights) + biases</span><br><span class="line">    <span class="keyword">if</span> activation_function <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        outputs = Wx_plus_b</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        outputs = activation_function(Wx_plus_b)</span><br><span class="line">    <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+<p>构建输入数据，在这里要注意x_data这个输入量，由于使用了np.newaxis函数使得np.linspace函数生成的数据发生了变化。在这里使用了占位符定义了神经网络的输入，None代表输入多少都是可以的，由于输入只有一个特征，因此设置为1。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x_data = np.linspace(<span class="number">-1</span>, <span class="number">1</span>, <span class="number">300</span>)[:, np.newaxis]</span><br><span class="line">noise = np.random.normal(<span class="number">0</span>, <span class="number">0.05</span>, x_data.shape)</span><br><span class="line">y_data = np.square(x_data) - <span class="number">0.5</span> + noise</span><br><span class="line"></span><br><span class="line">xs = tf.placeholder(tf.<span class="built_in">float</span>32, [None, <span class="number">1</span>])</span><br><span class="line">ys = tf.placeholder(tf.<span class="built_in">float</span>32, [None, <span class="number">1</span>])</span><br></pre></td></tr></table></figure>
+<p>接下来定义神经层。通常神经层由输入层、隐藏层和输出层组成。在这里由于输入层只有1个输入，即x_data，因此只设置1个输入；隐藏层假设有10个神经元；输出层也只有1个输出，因此设置1个输出。所以，我么构建了输入层包含1个神经元，隐含层包含10个神经元，输出层包含1个神经元的神经网络。</p>
+<p>定义隐含层，隐含层的输入是输入层的输出，这一点一定要明确。在这里我们虽然假设定义了包含1个神经元的输入层，实际上我们是默认了输入数据即代表一个输入层神经元，因此并没有直接定义输入层。在这里，激活函数采用了Tensorflow自带的tf,nn.relu函数，这也是使用Tensorflow这个框架的便捷之处。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">l1 = add_layer(xs, <span class="number">1</span>, <span class="number">10</span>, activation_function = tf.nn.relu)</span><br></pre></td></tr></table></figure>
+<p>定义输出层，输出层的输入是隐含层的输出，因此要承接隐含层神经元个数。输出层设置为1。另外在这里并没有设置激活函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prediction = add_layer(l1, <span class="number">10</span>, <span class="number">1</span>, activation_function = <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+<p>计算预测值和真实值的误差，对二者差的平方求和再取平均。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - preduction), reduction_indices = [<span class="number">1</span>]))</span><br></pre></td></tr></table></figure>
+<p>让神经网络的学习率有效提高的方法之一是采用优化器。TensorFlow优化器GradientDescentOptimizer是一个实现梯度下降算法的优化器。在这里取值是0.1表示以0.1的效率来最小化误差loss。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_step = tf.train.GradientDescentOptimizer(<span class="number">0.1</span>).minimize(loss)</span><br></pre></td></tr></table></figure>
+<p>初始化变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">init = tf.global_variables_initializer()</span><br></pre></td></tr></table></figure>
+<p>初始化会话控制Session。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sess = tf.Session()</span><br></pre></td></tr></table></figure>
+<p>初始化变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sess.run(init)</span><br></pre></td></tr></table></figure>
+<p>开始进行数据的训练。</p>
+<p>在这里让机器学习1000次。机器学习的内容是train_step，用Session来run每一次的training数据，逐步提升神经网络的准确性。当运算到placeholder时，需要feed_dict这个字典来指定输入。</p>
+<p>在这里为什么要使用feed_dict呢？我们需要注意到train_step里包含loss，而其主要作用是利用梯度下降算法来优化loss函数。loss函数的基本思想是计算预测值和真实值的误差，之后对二者的差求平方再求和。在loss函数定义时，并没有直接将数据放入式中，而是采用了占位符的方式，等待数据放入。因此必须在这里使用feed_dict{}这个字典进行数据的存放的读取。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">    sess.run(train_step, feed_dict=&#123;xs: x_data, ys: y_data&#125;)</span><br></pre></td></tr></table></figure>
+<p>设置每50步输出一次机器学习过程中的误差loss。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> i % <span class="number">50</span> == <span class="number">0</span>:</span><br><span class="line">   print(sess.run(loss, feed_dict=&#123;xs:x_data, ys: y_data&#125;))</span><br></pre></td></tr></table></figure>
+<p>电脑代码运行结果：</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/搭建第一个神经网络代码运行结果.PNG" alt="搭建第一个神经网络代码运行结果"></p>
+<p>可以很明显的看到，误差函数的值是逐渐减小的，这说明搭建的神经网络是有效的。</p>
+<h3 id="10、数据结果可视化"><a href="#10、数据结果可视化" class="headerlink" title="10、数据结果可视化"></a>10、数据结果可视化</h3><p>将9中搭建的神经网络的数据进行显示。</p>
+<p>导入matplotlib.pyplot模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
+<p>在Session后面加入如下代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">fig = plt.figure()</span><br><span class="line">ax = fig.add_subplot(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">ax.scatter(x_data, y_data)</span><br><span class="line">plt.ion()<span class="comment">#只执行散点图必须注释，执行全局运行则不需要注释</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>在这里plt.ion()代表打开交互模式，plt.ioff()代表关闭交互模式。在matplotlib中画图有两种显示模式：</p>
+<p>（1）阻塞模式，利用plt.show()显示图片，且图片关闭之前将代码阻塞在该行。</p>
+<p>（2）交互模式，plt.plot()直接显示图片，并且不阻塞代码的继续运行。</p>
+<p>运行结果如图所示：</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/散点图.png" alt="散点图"></p>
+<p>显示神经网络预测数据，每50次刷新预测图形，用红色、宽度为5的线显示，并且暂停0.1s。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:<span class="comment">#异常处理内容</span></span><br><span class="line">   ax.lines.remove(lines[<span class="number">0</span>])<span class="comment">#清除初始图线</span></span><br><span class="line"><span class="keyword">except</span> Exception:</span><br><span class="line">   <span class="keyword">pass</span></span><br><span class="line">prediction_value = sess.run(prediction, feed_dict=&#123;xs: x_data&#125;)</span><br><span class="line">lines = ax.plot(x_data, prediction_value, <span class="string">'r-'</span>, lw=<span class="number">5</span>)</span><br><span class="line">plt.pause(<span class="number">0.1</span>)<span class="comment">#暂停功能，让程序暂停0.1秒</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>在这里利用了异常处理算法，检测图中是否有其它图线，若存在这些图线则清除。由于每50步绘制一次图线，因此当下一个50步输出结果进行绘图时为了防止上一次执行的结果对其的影响，需要进行图线的清除。</p>
+<p>总体程序执行结果：</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/神经网络学习结果.png" alt="神经网络学习结果"></p>
+<h3 id="11、加速神经网络的训练or提高神经网络的收敛速度or优化算法"><a href="#11、加速神经网络的训练or提高神经网络的收敛速度or优化算法" class="headerlink" title="11、加速神经网络的训练or提高神经网络的收敛速度or优化算法"></a>11、加速神经网络的训练or提高神经网络的收敛速度or优化算法</h3><p>对于神经网络的训练，假如只是将数据放入其中，可想而知其训练会持续相当长的时间。因此，在训练过程中必须使用一些优化算法来帮助神经网络提高训练速度。这个过程也被称为神经网络的优化过程。</p>
+<p>以下是部分优化算法的介绍。</p>
+<h4 id="（1）梯度下降算法"><a href="#（1）梯度下降算法" class="headerlink" title="（1）梯度下降算法"></a>（1）梯度下降算法</h4><p>梯度下降的核心思想是通过寻找最小值，控制方差，更新模型参数，最终使模型收敛。常用的梯度下降算法包括：批量梯度下降算法（Batch Gradient Descent，BGD）、随机梯度下降算法（Stochastic Gradient Descent，SGD）、小批量梯度下降算法（Mini-Batch Gradient Descent，MBGD）。</p>
+<p>批量梯度下降算法（Batch Gradient Descent，BGD）：批量梯度算法是梯度算法最原始的形式，它的具体思路是当更新每一个参数时都是用所有的样本来进行更新。当然，批量梯度下降算法得到的是一个全局最优解。但是由于它在每一次迭代过程中都必须使用训练集中的所有数据，如果样本数很大，这样的迭代方式就会变得很慢。</p>
+<p>随机梯度下降算法（Stochastic Gradient Descent，SGD）：由于批量梯度算法需要所有的训练样本导致训练速度变得极其缓慢，随机梯度下降是每次迭代使用一个样本来对参数进行更新，使得训练速度加快。。但是，随机梯度下降算法得到的并不是全局最优解，而是一个局部最小值。</p>
+<p>小批量梯度下降算法（Mini-Batch Gradient Descent，MBGD）：批量梯度下降，是对批量梯度下降以及随机梯度下降的一个折中办法。其思想是每次迭代使用batch_size个样本来对参数进行更新。每次迭代采用batch_size数量的样本进行运算，假设训练集有30万个样本，设置batch_size=100，迭代次数就变成了3000次，相较于SGD迭代30万次，大大降低了迭代的次数。</p>
+<p>假设数据集包含1000个样本，BGD算法每次迭代需要计算全部的样本才能对一个参数进行更新，假设迭代10次即可将所有参数更新完毕，则需要计算10000次；对于SGD算法来说，每次迭代只需要计算一个样本，因此对于这个数据集来说，很大概率在这1000次迭代期间就能够完成所有参数的更新，因此最多计算1000次；而对于MBGD算法来说，假设batch_size=100，每次运算采用100个样本，这样一个数据集仅需要10次即可迭代完成，虽然和SGD算法的计算量相同，但是迭代次数远远小于SGD算法的迭代次数。</p>
+<h4 id="（2）Momentum算法"><a href="#（2）Momentum算法" class="headerlink" title="（2）Momentum算法"></a>（2）Momentum算法</h4><p>Momentum算法相当于对原始梯度做了一个平滑，之后在进行梯度下降。通常的梯度下降算法，其下降路径是曲折的；而Momentum算法通过对原始梯度做了一个平滑，正好将纵轴方向的梯度抹平了，使得参数更新方向更多地沿着横轴进行，因此速度更快。</p>
+<p><img src="/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/Momentum算法梯度下降平滑示意图.jpg" alt="Momentum算法梯度下降平滑示意图"></p>
+<h4 id="（3）AdaGrad算法"><a href="#（3）AdaGrad算法" class="headerlink" title="（3）AdaGrad算法"></a>（3）AdaGrad算法</h4><p>AdaGrad算法主要是改变学习率，使得每一个参数更新都会有对应的学习率。</p>
+<h4 id="（4）RMSProp算法"><a href="#（4）RMSProp算法" class="headerlink" title="（4）RMSProp算法"></a>（4）RMSProp算法</h4><p>AdaGrad算法的改进。RMSProp算法结合了部分Momentum算法和AdaGrad算法。</p>
+<h4 id="（5）Adam算法"><a href="#（5）Adam算法" class="headerlink" title="（5）Adam算法"></a>（5）Adam算法</h4><p>Adam算法即自适应时刻估计方法（Adaptive Moment Estimation），能计算每个参数的自适应学习率。它吸取了RMSProp最大的优点，将动量优化的概念相结合，使得策略可以做出快速高效的优化。</p>
+<h3 id="12、Tensorflow中封装完成的优化器"><a href="#12、Tensorflow中封装完成的优化器" class="headerlink" title="12、Tensorflow中封装完成的优化器"></a>12、Tensorflow中封装完成的优化器</h3><p>在<a href="https://github.com/tensorflow/docs/tree/r1.14/site/en/api_docs/python/tf/train" target="_blank" rel="noopener">Tensorflow官方文档</a>中提供了许多封装完成的优化器，在使用时可以直接根据参数要求进行调用即可。</p>
+<p>以下列出了Tensorflow1.14.0中的优化器：</p>
+<p>（1）tf.train.AdadeltaOptimizer</p>
+<p>（2）tf.train.AdagradDAOptimizer</p>
+<p>（3）tf.train.AdagradOptimizer</p>
+<p>（4）tf.train.AdamOptimizer</p>
+<p>（5）tf.train.FtrlOptimizer</p>
+<p>（6）tf.train.GradientDescentOptimizer</p>
+<p>（7）tf.train.MomentumOptimizer</p>
+<p>（8）tf.train.Optimizer</p>
+<p>（9）tf.train.ProximalAdagradOptimizer</p>
+<p>（10）tf.train.ProximalGradientDescentOptimizer</p>
+<p>（11）tf.train.RMSPropOptimizer</p>
+<p>（12）tf.train.SyncReplicasOptimizer</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>张力元
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://Zhangliyuan-tech.github.io/2021/04/19/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E7%AF%87/" target="_blank" rel="noopener" title="Tensorflow搭建神经网络基础篇">https://Zhangliyuan-tech.github.io/2021/04/19/Tensorflow搭建神经网络基础篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+              <a href="/tags/Tensorflow/" rel="tag"><i class="fa fa-tag"></i> Tensorflow</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/AI/" rel="tag"><i class="fa fa-tag"></i> AI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/25/Python-Matplotlib%E7%BB%98%E5%9B%BE/" rel="prev" title="Python-Matplotlib绘图">
+      <i class="fa fa-chevron-left"></i> Python-Matplotlib绘图
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/27/Tensorflow%E6%90%AD%E5%BB%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%BF%9B%E9%98%B6%E7%AF%87/" rel="next" title="Tensorflow搭建神经网络进阶篇">
+      Tensorflow搭建神经网络进阶篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#写在前面"><span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1、神经网络的梯度下降"><span class="nav-text">1、神经网络的梯度下降</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、What-is-Tensorflow"><span class="nav-text">2、What is Tensorflow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、Tensorflow基础架构之处理结构"><span class="nav-text">3、Tensorflow基础架构之处理结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、Tensorflow基本内容之会话机制（Session）"><span class="nav-text">4、Tensorflow基本内容之会话机制（Session）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、变量：Variable"><span class="nav-text">5、变量：Variable</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）-初始化值"><span class="nav-text">（1） 初始化值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）维度变换"><span class="nav-text">（2）维度变换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、占位符：Placeholder"><span class="nav-text">6、占位符：Placeholder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7、激励函数：Activation-Function"><span class="nav-text">7、激励函数：Activation Function</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）什么是激励函数？"><span class="nav-text">（1）什么是激励函数？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）为什么要使用激励函数？"><span class="nav-text">（2）为什么要使用激励函数？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（3）常见的激励函数"><span class="nav-text">（3）常见的激励函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8、定义or添加一个层"><span class="nav-text">8、定义or添加一个层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9、搭建第一个神经网络"><span class="nav-text">9、搭建第一个神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10、数据结果可视化"><span class="nav-text">10、数据结果可视化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11、加速神经网络的训练or提高神经网络的收敛速度or优化算法"><span class="nav-text">11、加速神经网络的训练or提高神经网络的收敛速度or优化算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）梯度下降算法"><span class="nav-text">（1）梯度下降算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）Momentum算法"><span class="nav-text">（2）Momentum算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（3）AdaGrad算法"><span class="nav-text">（3）AdaGrad算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（4）RMSProp算法"><span class="nav-text">（4）RMSProp算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（5）Adam算法"><span class="nav-text">（5）Adam算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12、Tensorflow中封装完成的优化器"><span class="nav-text">12、Tensorflow中封装完成的优化器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="张力元"
+      src="/images/author.jpg">
+  <p class="site-author-name" itemprop="name">张力元</p>
+  <div class="site-description" itemprop="description">在谁都不了解谁的人群里，在这样一个人人目视前方、也只知道目视前方的世界里，要这样向前飞驰。————《南方高速》</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Zhangliyuan-tech" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Zhangliyuan-tech" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">张力元</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+  
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+</body>
+</html>
